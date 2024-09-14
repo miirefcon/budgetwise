@@ -33,9 +33,23 @@
   measurementId: "G-0RSW9PSH90"
 };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+   // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the database
+        const database = firebase.database();
+
+        function writeData() {
+            database.ref('test/').set({
+                message: 'Hello from Firebase!'
+            });
+        }
+
+        function readData() {
+            database.ref('test/').once('value').then(snapshot => {
+                alert(snapshot.val().message);
+            });
+        }
 </script>
 
     <header>
