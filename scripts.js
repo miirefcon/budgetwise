@@ -38,7 +38,9 @@ function saveData() {
     const isConfirmed = window.confirm('Save changes?');
 
     if (isConfirmed) {
-        const editIndex = document.getElementById('editIndex').value;
+        const editIndex = document.getElementById('editIndex').value || Date.now();
+        console.log('Edit Index:', editIndex);
+        
         const data = {
             date: document.getElementById('date').value,
             name: document.getElementById('name').value,
@@ -52,7 +54,9 @@ function saveData() {
             remarks: document.getElementById('remarks').value
         };
 
-        const dataRef = ref(database, 'entries/' + (editIndex || Date.now()));
+        console.log('Data to Save:', data);
+
+        const dataRef = ref(database, 'entries/' + editIndex);
         
         set(dataRef, data).then(() => {
             document.getElementById('dataForm').reset();
@@ -65,6 +69,7 @@ function saveData() {
         console.log('Save changes cancelled.');
     }
 }
+
 
 // Function to load data from Firebase and populate the table
 function loadData() {
