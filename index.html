@@ -6,52 +6,12 @@
     <title>Business System</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Import Firebase App and Database -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    
+    <script src="https://unpkg.com/jspdf-autotable@latest/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-
-<script>
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-  apiKey: "AIzaSyBr3UMkygb2GpEDfRX_lE3mv3c_v7FiU_4",
-  authDomain: "budgetwise-4b34f.firebaseapp.com",
-  databaseURL: "https://budgetwise-4b34f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "budgetwise-4b34f",
-  storageBucket: "budgetwise-4b34f.appspot.com",
-  messagingSenderId: "134490215311",
-  appId: "1:134490215311:web:d78f538dd5c9e8cc8ef1fa",
-  measurementId: "G-0RSW9PSH90"
-};
-
-   // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // Get a reference to the database
-        const database = firebase.database();
-
-        function writeData() {
-            database.ref('test/').set({
-                message: 'Hello from Firebase!'
-            });
-        }
-
-        function readData() {
-            database.ref('test/').once('value').then(snapshot => {
-                alert(snapshot.val().message);
-            });
-        }
-</script>
-
     <header>
         <img src="images/miilogo.PNG" alt="Company Logo" class="header-logo">
         <div class="header-text">
@@ -131,7 +91,7 @@
         <select id="sortBy" onchange="sortTable()">
             <option value="">Select</option>
             <option value="date">Date</option>
-            <option value="dateOfPurchase">Date of Purchase</option>
+            <option value="purchaseDate">Purchase Date</option>
         </select>
         <button onclick="exportToPDF()">Export to PDF</button>
         <button id="toggleActions" onclick="toggleActions()">Show Actions</button>
@@ -146,7 +106,7 @@
                         <th>Brand</th>
                         <th>Model</th>
                         <th>Serial Number</th>
-                        <th>Date of Purchase</th>
+                        <th>Purchase Date</th>
                         <th>Amount</th>
                         <th>Remarks</th>
                         <th class="action-header">Actions</th>
