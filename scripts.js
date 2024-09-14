@@ -14,8 +14,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const database = firebase.database(app);
+firebase.initializeApp(firebaseConfig);
+
+// Get a reference to the database
+const database = firebase.database();
 
 // Global variable to toggle the visibility of actions
 let showActions = false;
@@ -112,121 +114,76 @@ function toggleActions() {
     loadData();
 }
 
-// Function to filter data based on the newly saved entry
-function filterBySimilarData(data) {
-    const rows = document.querySelectorAll('#dataTable tbody tr');
-
-    rows.forEach(row => {
-        const cells = row.getElementsByTagName('td');
-        const nameMatch = cells[1].textContent.toLowerCase() === data.name.toLowerCase();
-        const brandMatch = cells[4].textContent.toLowerCase() === data.brand.toLowerCase();
-        const remarksMatch = cells[9].textContent.toLowerCase() === data.remarks.toLowerCase();
-        
-        // Display rows where any of the data fields match
-        row.style.display = nameMatch || brandMatch || remarksMatch ? '' : 'none';
-    });
-}
-
-// Function to filter rows based on cell data when a column is clicked
-function filterByCellData(value, columnIndex) {
-    const filterValue = value.toLowerCase();
-    const rows = document.querySelectorAll('#dataTable tbody tr');
-
-    rows.forEach(row => {
-        const cells = row.getElementsByTagName('td');
-        const cellValue = cells[columnIndex].textContent.toLowerCase();
-        row.style.display = cellValue === filterValue ? '' : 'none';
-    });
-}
-
-// Function to populate the form with data for editing
-function editData(key) {
-    const dataRef = ref(database, 'entries/' + key);
-
-    get(dataRef).then((snapshot) => {
-        if (snapshot.exists()) {
-            const item = snapshot.val();
-
-            document.getElementById('date').value = item.date;
-            document.getElementById('name').value = item.name;
-            document.getElementById('contact').value = item.contact;
-            document.getElementById('address').value = item.address;
-            document.getElementById('brand').value = item.brand;
-            document.getElementById('model').value = item.model;
-            document.getElementById('serial').value = item.serial;
-            document.getElementById('purchaseDate').value = item.purchaseDate;
-            document.getElementById('amount').value = item.amount;
-            document.getElementById('remarks').value = item.remarks;
-            document.getElementById('editIndex').value = key;
-
-            openTab('input');
-        } else {
-            console.log('No data available');
-        }
-    }).catch((error) => {
-        console.error('Error fetching data:', error);
-    });
-}
-
-// Function to delete a data entry
-function deleteData(key) {
-    if (confirm('Are you sure you want to delete this entry?')) {
-        const dataRef = ref(database, 'entries/' + key);
-
-        remove(dataRef).then(() => {
-            loadData();
-        }).catch((error) => {
-            console.error('Error deleting data:', error);
-        });
-    }
-}
-
-// Function to filter table rows based on search input
+// Function to filter table data based on search input
 function filterData() {
-    const filter = document.getElementById('search').value.toLowerCase();
-    const rows = document.querySelectorAll('#dataTable tbody tr');
+    const input = document.getElementById('search').value.toLowerCase();
+    const rows = document.getElementById('dataTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
-    rows.forEach(row => {
-        const cells = row.getElementsByTagName('td');
-        let match = false;
-        for (let i = 0; i < cells.length - (showActions ? 0 : 1); i++) { // Exclude Actions column if not visible
-            if (cells[i].textContent.toLowerCase().includes(filter)) {
-                match = true;
+    for (let i = 0; i < rows.length; i++) {
+        let showRow = false;
+        const cells = rows[i].getElementsByTagName('td');
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j].textContent.toLowerCase().includes(input)) {
+                showRow = true;
                 break;
             }
         }
-        row.style.display = match ? '' : 'none';
-    });
+        rows[i].style.display = showRow ? '' : 'none';
+    }
 }
 
-// Function to sort table rows based on selected criteria
+// Function to sort table data based on selected criteria
 function sortTable() {
     const table = document.getElementById('dataTable');
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-
+    const rows = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
     const sortBy = document.getElementById('sortBy').value;
-    
-    if (!sortBy) return;
 
     rows.sort((a, b) => {
-        const getText = (row, index) => row.querySelectorAll('td')[index].textContent.trim();
-        
-        let index;
-        if (sortBy === 'date') {
-            index = 0; 
-        } else if (sortBy === 'purchaseDate') {
-            index = 7; 
+        const cellA = a.getElementsByTagName('td')[getColumnIndex(sortBy)].textContent;
+        const cellB = b.getElementsByTagName('td')[getColumnIndex(sortBy)].textContent;
+
+        if (sortBy === 'amount') {
+            return parseFloat(cellA) - parseFloat(cellB);
+        } else {
+            return new Date(cellA) - new Date(cellB);
         }
-
-        const dateA = new Date(getText(a, index));
-        const dateB = new Date(getText(b, index));
-
-        return dateA - dateB;
     });
 
+    const tbody = table.getElementsByTagName('tbody')[0];
     rows.forEach(row => tbody.appendChild(row));
 }
+
+// Helper function to get the index of the column to sort by
+function getColumnIndex(sortBy) {
+    const headers = ['date', 'name', 'contact', 'address', 'brand', 'model', 'serial', 'purchaseDate', 'amount', 'remarks'];
+    return headers.indexOf(sortBy);
+}
+
+// Function to handle editing data
+function editData(key) {
+    const dataRef = firebase.database().ref('entries/' + key);
+    dataRef.once('value').then((snapshot) => {
+        const data = snapshot.val();
+        Object.keys(data).forEach((field) => {
+            document.getElementById(field).value = data[field];
+        });
+        document.getElementById('editIndex').value = key;
+        openTab('input');
+    }).catch((error) => {
+        console.error('Error editing data:', error);
+    });
+}
+
+// Function to handle deleting data
+function deleteData(key) {
+    const dataRef = firebase.database().ref('entries/' + key);
+    dataRef.remove().then(() => {
+        loadData();
+    }).catch((error) => {
+        console.error('Error deleting data:', error);
+    });
+}
+
 
 // Function to export the table data to PDF
 async function exportToPDF() {
@@ -328,8 +285,6 @@ async function exportToPDF() {
     // Save the PDF
     doc.save('data.pdf');
 }
-
-openTab('input');
 
 // Function to show suggestions based on input field
 function showSuggestions(fieldId) {
