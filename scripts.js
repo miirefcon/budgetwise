@@ -38,9 +38,7 @@ function saveData() {
     const isConfirmed = window.confirm('Save changes?');
 
     if (isConfirmed) {
-        const editIndex = document.getElementById('editIndex').value || Date.now();
-        console.log('Edit Index:', editIndex);
-        
+        const editIndex = document.getElementById('editIndex').value || Date.now().toString();
         const data = {
             date: document.getElementById('date').value,
             name: document.getElementById('name').value,
@@ -54,11 +52,11 @@ function saveData() {
             remarks: document.getElementById('remarks').value
         };
 
-        console.log('Data to Save:', data);
+        // Get a reference to the database
+        const dataRef = firebase.database().ref('entries/' + editIndex);
 
-        const dataRef = ref(database, 'entries/' + editIndex);
-        
-        set(dataRef, data).then(() => {
+        // Save data to Firebase
+        dataRef.set(data).then(() => {
             document.getElementById('dataForm').reset();
             openTab('view');
             loadData();
@@ -70,15 +68,14 @@ function saveData() {
     }
 }
 
-
 // Function to load data from Firebase and populate the table
 function loadData() {
     const dataTableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
     dataTableBody.innerHTML = '';
 
-    const dataRef = ref(database, 'entries');
+    const dataRef = firebase.database().ref('entries');
 
-    get(dataRef).then((snapshot) => {
+    dataRef.once('value').then((snapshot) => {
         if (snapshot.exists()) {
             const allData = snapshot.val();
             Object.keys(allData).forEach((key) => {
@@ -95,15 +92,13 @@ function loadData() {
                     editButton.textContent = 'Edit';
                     editButton.onclick = () => editData(key);
                     actionCell.appendChild(editButton);
-
+                    
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Delete';
                     deleteButton.onclick = () => deleteData(key);
                     actionCell.appendChild(deleteButton);
                 }
             });
-        } else {
-            console.log('No data available');
         }
     }).catch((error) => {
         console.error('Error loading data:', error);
@@ -333,6 +328,8 @@ async function exportToPDF() {
     // Save the PDF
     doc.save('data.pdf');
 }
+
+openTab('input');
 
 // Function to show suggestions based on input field
 function showSuggestions(fieldId) {

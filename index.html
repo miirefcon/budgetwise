@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable@latest/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable"></script>
 </head>
 <body>
     <header>
@@ -91,7 +91,7 @@
         <select id="sortBy" onchange="sortTable()">
             <option value="">Select</option>
             <option value="date">Date</option>
-            <option value="purchaseDate">Purchase Date</option>
+            <option value="dateOfPurchase">Date of Purchase</option>
         </select>
         <button onclick="exportToPDF()">Export to PDF</button>
         <button id="toggleActions" onclick="toggleActions()">Show Actions</button>
@@ -106,7 +106,7 @@
                         <th>Brand</th>
                         <th>Model</th>
                         <th>Serial Number</th>
-                        <th>Purchase Date</th>
+                        <th>Date of Purchase</th>
                         <th>Amount</th>
                         <th>Remarks</th>
                         <th class="action-header">Actions</th>
