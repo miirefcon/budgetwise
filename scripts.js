@@ -16,7 +16,6 @@ function openTab(tabName) {
 
 // Function to save data from the form
 function saveData() {
-    // Show confirmation dialog
     const isConfirmed = window.confirm('Save changes?');
 
     if (isConfirmed) {
@@ -30,68 +29,66 @@ function saveData() {
             model: document.getElementById('model').value,
             serial: document.getElementById('serial').value,
             purchaseDate: document.getElementById('purchaseDate').value,
-            amount: parseFloat(document.getElementById('amount').value).toFixed(2), // Ensure two decimal places
+            amount: parseFloat(document.getElementById('amount').value).toFixed(2),
             remarks: document.getElementById('remarks').value
         };
 
-        let allData = JSON.parse(localStorage.getItem('data')) || [];
+        const db = getDatabase();
+        const dataRef = ref(db, 'entries/' + (editIndex || Date.now()));
         
-        if (editIndex === '') {
-            allData.push(data);
-        } else {
-            allData[editIndex] = data;
-            document.getElementById('editIndex').value = '';
-        }
-        
-        localStorage.setItem('data', JSON.stringify(allData));
-        document.getElementById('dataForm').reset();
-
-        // Switch to "View Data" tab and filter similar data
-        openTab('view');
-        filterBySimilarData(data);
+        set(dataRef, data).then(() => {
+            document.getElementById('dataForm').reset();
+            openTab('view');
+            loadData();
+        }).catch((error) => {
+            console.error('Error saving data:', error);
+        });
     } else {
-        // User clicked "Cancel", do nothing
         console.log('Save changes cancelled.');
     }
 }
+
 
 // Function to load data from localStorage and populate the table
 function loadData() {
     const dataTableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
     dataTableBody.innerHTML = '';
 
-    const allData = JSON.parse(localStorage.getItem('data')) || [];
-    allData.forEach((item, index) => {
-        const row = dataTableBody.insertRow();
-        Object.values(item).forEach((value, idx) => {
-            const cell = row.insertCell();
-            if (idx === 8) {  // Assuming the amount is the 9th column
-                cell.textContent = `₱${parseFloat(value).toFixed(2)}`;
-            } else {
-                cell.textContent = value;
-            }
-            // Add click event handler for specific columns
-            if (idx === 1 || idx === 4 || idx === 9) { // Indexes for Name, Brand, and Remarks
-                cell.style.cursor = 'pointer'; // Show pointer cursor
-                cell.onclick = () => filterByCellData(value, idx);
-            }
-        });
+    const db = getDatabase();
+    const dataRef = ref(db, 'entries');
 
-        // Only show actions if toggleActions is true
-        if (showActions) {
-            const actionCell = row.insertCell();
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.onclick = () => editData(index);
-            actionCell.appendChild(editButton);
+    get(dataRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const allData = snapshot.val();
+            Object.keys(allData).forEach((key) => {
+                const item = allData[key];
+                const row = dataTableBody.insertRow();
+                Object.values(item).forEach((value, idx) => {
+                    const cell = row.insertCell();
+                    cell.textContent = idx === 8 ? `₱${parseFloat(value).toFixed(2)}` : value;
+                });
 
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.onclick = () => deleteData(index);
-            actionCell.appendChild(deleteButton);
+                if (showActions) {
+                    const actionCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.onclick = () => editData(key);
+                    actionCell.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.onclick = () => deleteData(key);
+                    actionCell.appendChild(deleteButton);
+                }
+            });
+        } else {
+            console.log('No data available');
         }
+    }).catch((error) => {
+        console.error('Error loading data:', error);
     });
 }
+
 
 // Function to toggle the visibility of action buttons
 function toggleActions() {
@@ -128,35 +125,50 @@ function filterByCellData(value, columnIndex) {
 }
 
 // Function to populate the form with data for editing
-function editData(index) {
-    const allData = JSON.parse(localStorage.getItem('data')) || [];
-    const item = allData[index];
+function editData(key) {
+    const db = getDatabase();
+    const dataRef = ref(db, 'entries/' + key);
 
-    document.getElementById('date').value = item.date;
-    document.getElementById('name').value = item.name;
-    document.getElementById('contact').value = item.contact;
-    document.getElementById('address').value = item.address;
-    document.getElementById('brand').value = item.brand;
-    document.getElementById('model').value = item.model;
-    document.getElementById('serial').value = item.serial;
-    document.getElementById('purchaseDate').value = item.purchaseDate;
-    document.getElementById('amount').value = item.amount;
-    document.getElementById('remarks').value = item.remarks;
-    document.getElementById('editIndex').value = index;
+    get(dataRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const item = snapshot.val();
 
-    // Switch to "Input Data" tab for editing
-    openTab('input');
+            document.getElementById('date').value = item.date;
+            document.getElementById('name').value = item.name;
+            document.getElementById('contact').value = item.contact;
+            document.getElementById('address').value = item.address;
+            document.getElementById('brand').value = item.brand;
+            document.getElementById('model').value = item.model;
+            document.getElementById('serial').value = item.serial;
+            document.getElementById('purchaseDate').value = item.purchaseDate;
+            document.getElementById('amount').value = item.amount;
+            document.getElementById('remarks').value = item.remarks;
+            document.getElementById('editIndex').value = key;
+
+            openTab('input');
+        } else {
+            console.log('No data available');
+        }
+    }).catch((error) => {
+        console.error('Error fetching data:', error);
+    });
 }
+
 
 // Function to delete a data entry
-function deleteData(index) {
+function deleteData(key) {
     if (confirm('Are you sure you want to delete this entry?')) {
-        let allData = JSON.parse(localStorage.getItem('data')) || [];
-        allData.splice(index, 1);
-        localStorage.setItem('data', JSON.stringify(allData));
-        loadData();
+        const db = getDatabase();
+        const dataRef = ref(db, 'entries/' + key);
+
+        remove(dataRef).then(() => {
+            loadData();
+        }).catch((error) => {
+            console.error('Error deleting data:', error);
+        });
     }
 }
+
 
 // Function to filter table rows based on search input
 function filterData() {
