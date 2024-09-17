@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Input & View</title>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Firebase Firestore SDK -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- jsPDF library -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF autoTable plugin -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script defer src="app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Logo" class="header-logo">
+        <div class="header-text">
+            <h1>Data Management System</h1>
+        </div>
+    </header>
+
+    <!-- Tabs for Input and View Data -->
+    <div class="tabs">
+        <button class="tablink" onclick="showTab('inputTab')">Input Data</button>
+        <button class="tablink" onclick="showTab('viewTab')">View Data</button>
+    </div>
+
+    <!-- Input Data Tab -->
+    <div id="inputTab" class="tabcontent">
+        <h2>Input Data</h2>
+        <form id="dataForm">
+            <label>Date: <input type="date" id="date" required></label><br>
+            <label>Name: <input type="text" id="name" required></label><br>
+            <label>Contact Number: <input type="text" id="contactNumber" required></label><br>
+            <label>Address: <input type="text" id="address" required></label><br>
+            <label>Brand: <input type="text" id="brand" required></label><br>
+            <label>Model: <input type="text" id="model" required></label><br>
+            <label>Serial Number: <input type="text" id="serialNumber" required></label><br>
+            <label>Date of Purchase: <input type="date" id="dateOfPurchase" required></label><br>
+            <label>Amount: <input type="number" id="amount" required></label><br>
+            <label>Remarks: <input type="text" id="remarks"></label><br>
+            <button type="button" onclick="saveData()">Submit</button>
+        </form>        
+    </div>
+
+    <!-- View Data Tab -->
+    <div id="viewTab" class="tabcontent" style="display:none;">
+        <h2>View Data</h2>
+        <input type="text" id="searchInput" placeholder="Search...">
+        <button onclick="sortTableByDate()">Sort by Date</button>
+        <button onclick="sortTableByDateOfPurchase()">Sort by Date of Purchase</button>
+        <button onclick="exportPDF()">Export to PDF</button>
+        <button onclick="toggleActions()">Show Actions</button>
+
+        <!-- Date Range Inputs -->
+        <div>
+            <label for="startDate">Start Date: </label>
+            <input type="date" id="startDate">
+            <label for="endDate">End Date: </label>
+            <input type="date" id="endDate">
+            <button onclick="filterByDateRange()">Filter by Date Range</button>
+        </div>
+
+        <table id="dataTable" border="1">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Contact Number</th>
+                    <th>Address</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Serial Number</th>
+                    <th>Date of Purchase</th>
+                    <th>Amount</th>
+                    <th>Remarks</th>
+                    <th class="action-header">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data from Firestore will be inserted here -->
+            </tbody>
+        </table>
+        <button id="loadMoreBtn" style="display: none;">Load More</button>
+    </div>
+
+    <footer>
+        <p>© 2024 Data Management System</p>
+    </footer>
+</body>
+</html>
