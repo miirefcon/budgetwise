@@ -18,8 +18,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <div id="loginContainer">
+        <div class="login-container">
+            <h2>Login (Budgetwise Free Installation)</h2>
+            <div id="errorMessage" style="display: none;">Invalid username or password.</div>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="button" id="loginButton">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="appContainer" style="display: none;">
+        <button id="logoutButton">Logout</button>
+
     <header>
-        <img src="/images/miilogo.png" alt="Logo" class="header-logo">
+
         <div class="header-text">
             <h1>Budgetwise Free Installation (MI&I)</h1>
         </div>
@@ -34,17 +50,19 @@
     <!-- Input Data Tab -->
     <div id="inputTab" class="tabcontent">
         <h2>Input Data</h2>
-        <form id="dataForm">
+        <form id="dataForm" onsubmit="event.preventDefault(); saveData();">
+            <input type="hidden" id="docId">
             <label>Date: <input type="date" id="date" required></label><br>
             <label>Name: <input type="text" id="name" required></label><br>
             <label>Contact Number: <input type="text" id="contactNumber" required></label><br>
             <label>Address: <input type="text" id="address" required></label><br>
             <label>Brand: <input type="text" id="brand" required></label><br>
             <label>Model: <input type="text" id="model" required></label><br>
-            <label>Serial Number: <input type="text" id="serialNumber" required></label><br>
+            <label>Serial Number:<textarea id="serialNumber" name="serialNumber" rows="4" cols="50" placeholder="Press Shift+Enter to go to next line..."></textarea></label>
             <label>Date of Purchase: <input type="date" id="dateOfPurchase" required></label><br>
             <label>Amount: <input type="number" id="amount" required></label><br>
             <label>Remarks: <input type="text" id="remarks"></label><br>
+            <label for="technicianInCharge">Technician/s in Charge:<input type="text" id="technicianInCharge" name="technicianInCharge"></label><br>
             <button type="button" onclick="saveData()">Submit</button>
         </form>        
     </div>
@@ -53,6 +71,7 @@
     <div id="viewTab" class="tabcontent" style="display:none;">
         <h2>View Data</h2>
         <input type="text" id="searchInput" placeholder="Search...">
+        <button id="searchBtn">Search</button>
         <button onclick="sortTableByDate()">Sort by Date</button>
         <button onclick="sortTableByDateOfPurchase()">Sort by Date of Purchase</button>
         <button onclick="exportPDF()">Export to PDF</button>
@@ -66,7 +85,7 @@
             <input type="date" id="endDate">
             <button onclick="filterByDateRange()">Filter by Date Range</button>
         </div>
-
+        <div id="tableContainer" style="height: 500px; overflow-y: auto;">
         <table id="dataTable" border="1">
             <thead>
                 <tr>
@@ -80,6 +99,7 @@
                     <th>Date of Purchase</th>
                     <th>Amount</th>
                     <th>Remarks</th>
+                    <th>Technician/s In Charge</th>
                     <th class="action-header">Actions</th> <!-- Make sure the Actions header is present -->
                 </tr>
             </thead>
@@ -87,11 +107,9 @@
                 <!-- Data from Firestore will be inserted here -->
             </tbody>
         </table>
-        
-        
-        <button id="loadMoreBtn" style="display: none;">Load More</button>
+        </div>
     </div>
-
+</div>
     <footer>
         <p>© 2022 MI&I REFRIGERATION AND AIRCONDITIONING SERVICES</p>
     </footer>
