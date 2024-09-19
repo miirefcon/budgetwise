@@ -319,7 +319,7 @@ function editRow(docId) {
             var data = doc.data();
             
             // Set form fields with document data
-            ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks'].forEach(field => {
+            ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks', 'technicianInCharge'].forEach(field => {
                 const element = document.getElementById(field);
                 if (element) {
                     element.value = data[field] || '';
@@ -425,7 +425,7 @@ function fetchData(direction = 'down') {
         snapshot.docs.forEach(doc => {
             var row = dataTable.insertRow();
             var data = doc.data();
-            ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks'].forEach((field, index) => {
+            ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks', 'technicianInCharge'].forEach((field, index) => {
                 var cell = row.insertCell(index);
                 if (field === 'amount') {
                     cell.textContent = formatCurrency(data[field]); // Format the amount field
@@ -473,7 +473,7 @@ function searchByKeyword() {
             if (matchFound) {
                 var row = dataTable.insertRow();
                 
-                ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks'].forEach((field, index) => {
+                ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks', 'technicianInCharge'].forEach((field, index) => {
                     var cell = row.insertCell(index);
                     if (field === 'amount') {
                         cell.textContent = formatCurrency(rowData[field]); // Apply currency formatting
@@ -526,7 +526,7 @@ function filterByDateRange() {
                 var rowData = doc.data();
                 var row = dataTable.insertRow();
                 
-                ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks'].forEach((field, index) => {
+                ['date', 'name', 'contactNumber', 'address', 'brand', 'model', 'serialNumber', 'dateOfPurchase', 'amount', 'remarks', 'technicianInCharge'].forEach((field, index) => {
                     var cell = row.insertCell(index);
                     if (field === 'amount') {
                         cell.textContent = formatCurrency(rowData[field]); // Apply currency formatting
