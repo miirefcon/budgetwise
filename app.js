@@ -156,6 +156,8 @@ function setupRealTimeListener() {
                 if (field === 'serialNumber') {
                     // Display serial numbers as paragraph
                     cell.innerHTML = `<pre>${rowData[field] || ''}</pre>`;
+                } else if (field === 'model') {
+                        cell.innerHTML = `<pre>${rowData[field] || ''}</pre>`;
                 } else if (field === 'amount') {
                     cell.textContent = formatCurrency(rowData[field]); // Apply currency formatting
                 } else {
@@ -367,6 +369,17 @@ function formatSerialNumbers(serialNumbers) {
     
     if (formattedNumbers === '') {
         alert('No serial numbers found. Please enter some serial numbers.');
+    }
+
+    return formattedNumbers; // Return as multi-line text
+}
+
+function formatModel(model) {
+    // No need to join lines, just return the trimmed input
+    const formattedNumbers = model.trim();
+    
+    if (formattedNumbers === '') {
+        alert('No model found. Please enter some model numbers.');
     }
 
     return formattedNumbers; // Return as multi-line text
