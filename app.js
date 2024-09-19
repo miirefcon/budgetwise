@@ -122,6 +122,7 @@ function showTab(tab) {
     document.getElementById('viewTab').style.display = (tab === 'viewTab') ? 'block' : 'none';
     if (tab === 'viewTab') {
         fetchData();  // Fetch data from Firestore when switching to the "View Data" tab
+        searchByKeyword(true);
     }
     
 }
@@ -446,6 +447,18 @@ function fetchData(direction = 'down') {
     });
 }
 
+function refresh() {
+    // Clear the search input
+    document.getElementById('searchInput').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+
+
+    // Call the searchByKeyword function to reset the table and fetch initial data
+    searchByKeyword();
+    filterByDateRange();
+}
+
 function searchByKeyword() {
     var keyword = document.getElementById('searchInput').value.trim().toLowerCase();
     var dataTable = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
@@ -483,7 +496,7 @@ function searchByKeyword() {
                 });
 
                 // Add Edit/Delete buttons
-                var actionCell = row.insertCell(10);
+                var actionCell = row.insertCell(11);
                 actionCell.classList.add('action-cell');
                 actionCell.innerHTML = `
                     <button onclick="editRow('${doc.id}')">Edit</button>
@@ -536,7 +549,7 @@ function filterByDateRange() {
                 });
 
                 // Add Edit/Delete buttons
-                var actionCell = row.insertCell(10);
+                var actionCell = row.insertCell(11);
                 actionCell.classList.add('action-cell');
                 actionCell.innerHTML = `
                     <button onclick="editRow('${doc.id}')">Edit</button>
