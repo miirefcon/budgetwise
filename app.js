@@ -136,7 +136,7 @@ function formatCurrency(value, includeSymbol = true) {
     // Parse the value to float and format it
     var number = parseFloat(value);
     var formatted = number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    return includeSymbol ? '₱' + formatted : formatted;
+    return includeSymbol ? 'PHP ' + formatted : formatted;
 }
 
 function setupRealTimeListener() {
@@ -562,72 +562,67 @@ function filterByDateRange() {
     });
 }
 
-function exportPDF() {
+function exportPDF(customHeader = "BUDGETWISE FREE INSTALLATION", customFooter = "MI&I REFRIGERATION AND AIRCONDITIONING SERVICES", excludeIndexes = [10, 11]) {
     const { jsPDF } = window.jspdf;
-
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
     });
 
-    // Ensure autoTable is available
     if (typeof doc.autoTable === 'undefined') {
         console.error('autoTable plugin is not loaded.');
+        alert('Error: autoTable plugin is not loaded. Please check your setup.');
         return;
     }
-
-    // Custom header and footer for every page
-    const headerText = "BUDGETWISE FREE INSTALLATION";
-    const footerText = "MI&I REFRIGERATION AND AIRCONDITIONING SERVICES";
 
     function addHeaderFooter(data) {
         doc.setFontSize(14);
         doc.setTextColor(40);
-        doc.text(headerText, data.settings.margin.left, 10);
-
+        doc.text(customHeader, data.settings.margin.left, 10);
         const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
         doc.setFontSize(10);
-        doc.text(footerText, data.settings.margin.left, pageHeight - 10);
+        doc.text(customFooter, data.settings.margin.left, pageHeight - 10);
     }
 
     const tableBody = document.querySelectorAll('#dataTable tbody tr');
     const visibleRows = Array.from(tableBody).filter(row => row.style.display !== 'none');
 
     if (visibleRows.length === 0) {
-        alert('No data available to export.');
+        alert('No visible data available to export. Please ensure there are rows displayed.');
         return;
     }
-
-    // Exclude columns with index 10 and 11 (Technicians in Charge and Actions)
-    const excludeIndexes = [10, 11];
 
     const headers = Array.from(document.querySelectorAll('#dataTable thead th'))
         .map((th, index) => excludeIndexes.includes(index) ? null : th.textContent)
         .filter(header => header !== null);
 
-    const rows = visibleRows.map(row => {
-        return Array.from(row.querySelectorAll('td')).map((td, index) => {
+    const rows = [];
+    let totalAmount = 0;
+
+    visibleRows.forEach(row => {
+        const rowData = Array.from(row.querySelectorAll('td')).map((td, index) => {
             if (excludeIndexes.includes(index)) {
-                return null; // Exclude specific columns
+                return null;
             } else {
                 let text = td.textContent.trim();
-                if (text.includes('₱')) {
-                    text = text.replace('₱', 'PHP '); // Replace '₱' with 'PHP '
+                let cleanedText = text.replace(/[^0-9.-]+/g, ""); // Remove non-numeric characters
+                if (index === 8) { // Assuming index 4 is the amount
+                    const amount = parseFloat(cleanedText);
+                    if (!isNaN(amount)) {
+                        totalAmount += amount; // Add to total if valid number
+                        return formatCurrency(amount); // Format amount with symbol for the table
+                    }
                 }
-                return text;
+                return text; // Return the original text for other columns
             }
-        }).filter(cell => cell !== null); // Remove null values
+        }).filter(cell => cell !== null);
+        rows.push(rowData);
     });
 
-    // Get page width and set margins
     const pageWidth = doc.internal.pageSize.width;
     const margins = { top: 20, left: 10, right: 10 };
-
-    // Calculate available width for table
     const availableWidth = pageWidth - margins.left - margins.right;
-
-    // Adjust column widths dynamically
     const columnWidth = Math.floor(availableWidth / headers.length);
 
     doc.autoTable({
@@ -636,17 +631,17 @@ function exportPDF() {
         startY: 20,
         theme: 'grid',
         styles: {
-            fontSize: 8, // Reduced font size for compactness
-            cellPadding: 2, // Reduced padding for more compact cells
+            fontSize: 8,
+            cellPadding: 2,
             valign: 'middle',
             halign: 'left',
-            overflow: 'linebreak', // Ensures text wraps within the cell
-            cellWidth: 'auto' // Allow auto column width adjustment
+            overflow: 'linebreak',
+            cellWidth: 'auto'
         },
         headStyles: {
             fillColor: [44, 62, 80],
             textColor: [255, 255, 255],
-            fontSize: 10, // Slightly reduced font size for header
+            fontSize: 10,
             fontStyle: 'bold',
             overflow: 'linebreak'
         },
@@ -660,18 +655,18 @@ function exportPDF() {
         showHead: 'firstPage'
     });
 
-    // Get the current date to include in the file name
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-    const day = String(currentDate.getDate()).padStart(2, '0');
+    // Add total amount to the PDF
+    doc.setFontSize(10);
+    doc.text(`Total Amount: ${formatCurrency(totalAmount)}`, margins.left, doc.autoTable.previous.finalY + 10);
 
-    const formattedDate = `${year}-${month}-${day}`;
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
     const fileName = `budgetwise-free-installation(${formattedDate}).pdf`;
 
-    // Save the PDF with the generated file name
     doc.save(fileName);
+    alert('PDF generated successfully!');
 }
+
 
 
 // Handle scroll event to fetch more data
