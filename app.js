@@ -123,6 +123,7 @@ function showTab(tab) {
     if (tab === 'viewTab') {
         fetchData();  // Fetch data from Firestore when switching to the "View Data" tab
         searchByKeyword(true);
+        refresh();
     }
     
 }
@@ -402,7 +403,7 @@ function fetchData(direction = 'down') {
         dataTable.innerHTML = "";
     }
 
-    let query = dataCollection.orderBy("date", "desc").limit(10);
+    let query = dataCollection.orderBy("date", "desc").limit(1000);
 
     if (direction === 'down') {
         if (lastVisible) {
